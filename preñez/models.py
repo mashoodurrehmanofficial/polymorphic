@@ -15,3 +15,7 @@ class Preñez(models.Model):
     vaca = models.ForeignKey(Vaca, on_delete = models.CASCADE)
     fecundaciones = models.ManyToManyField(MetodoPreñez, related_name = "fecundaciones")
     usuario = models.ForeignKey(User, on_delete = models.SET_NULL, null = True)
+
+
+
+    
