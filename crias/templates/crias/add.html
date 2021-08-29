@@ -1,0 +1,173 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Información de la Cria{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información de la Cria</h1>
+    <ul>
+        <li><a href="{% url "crias" %}">Inicio</a></li>
+        <li>Agregar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <form method="post" action="{% url "crias.add" %}">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>                
+                <div class="card-body">
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="vaca_id">Vaca<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="vaca_id" id="vaca_id" required>
+                                <option>--</option>
+                                {% for vaca in vacas %}
+                                <option value="{{ vaca.id }}">{{ vaca.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="nombre">Nombre<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="nombre" name="nombre">
+                        </div>  
+                        <div class="col-lg-3">
+                            <label for="raza">Raza<span style="color: red;">(*)</span></label>
+                            
+                            <select class="form-control" id="raza" name="raza" required value="">
+                                {% for raza in razas %}
+                                <option value="{{raza.nombre}}">{{raza.nombre}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if request.user.is_staff %}
+                        <div class="col-lg-2">
+                            <a href="#" id="raza_add" class="btn btn-primary btn-rounded m-1">Nuevo</a>
+                        </div>
+                        {% endif %}                    
+                    </div>
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="fecha_nacimiento">Fecha de Nacimiento<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_nacimiento" name="fecha_nacimiento" required value="">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="sexo">Sexo<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="sexo" required>
+                                <option value="Hembra">Hembra</option>
+                                <option value="Macho">Macho</option>
+                            </select>
+                        </div>
+                       
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="nacimiento">Nació<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="nacimiento" id="nacimiento" required>
+                                <option value="Vivo">Vivo</option>
+                                <option value="Muerto">Muerto</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="destino">Destino<span style="color: red;">(*)</span></label>
+                            <select class="form-control" id="destino" name="destino" required>
+                                <option value="Criar">Criar</option>
+                                <option value="Vender">Vender</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row text-right">
+                            <div class="col-lg-12 ">
+                                <button type="submit" class="btn btn-primary btn-rounded m-1">Guardar</button>
+                                <a href="{% url "crias" %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="razamodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Raza</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form data-parsley-validate id="razaForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group row">                                
+                            <div class="col-lg-12">
+                                <label for="new_raza">Nuevo Raza<span style="color: red;">(*)</span></label>
+                                <input type="text" class="form-control" id="new_raza" name="new_raza" required value="" required>
+                            </div>
+                        </div>
+                       
+                    </form>
+                    
+                </div>
+                <div class="modal-footer">
+                    <input id="btn_raza_p" type="button" class="btn btn-primary" value="OK">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}
+{% block scripts %}
+<script>
+    //var fecha_c = $('#fecha_nacimiento').val();
+    $("#nacimiento").change(function(){
+        option_destiny.push({id: "Muerto", text: "Muerto"});
+        var newOption = new Option("Muerto", "Muerto", false, false);
+        $('#destino').find('option').remove().end();
+            $('#destino').append(newOption).trigger('change');
+        
+        
+    });
+    var option_destiny = []
+    // $('#destino option').each(function(idx) {
+    //     option_destiny.push({id: $(this).val(), text: $(this).text()});
+    // });
+    $("#raza_add").on('click', function(e){
+        $("#razamodal").modal();
+    });
+    $("#btn_raza_p").on('click', function(e){
+        $("#razaForm").parsley().validate();
+        if ($("#razaForm").parsley().validate() == true) {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_raza_add" %}',
+                data: {
+                    nombre: $("#new_raza").val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    if (data.status=="Success") {
+                        location.reload();
+                    } else {
+                        swal({
+                            text: "Esta raza ya existe",
+                            type: "warning",
+                            buttonsStyling: false,
+                            confirmButtonClass: 'btn btn-lg btn-warning',
+
+                        });
+                    }
+                }
+            });
+        }
+        
+    });
+</script>
+{% endblock %}

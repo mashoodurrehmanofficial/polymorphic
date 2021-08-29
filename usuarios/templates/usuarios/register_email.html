@@ -1,0 +1,28 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+
+</head>
+<body style="padding: 0px; margin: 0px; background-color: #F7F8F9;">
+	<div class="main-wrapper" style="box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; -o-box-sizing: border-box; -ms-box-sizing: border-box; display: block; width: 634px; padding: 30px 30px; background-color: #ffffff; border-radius: 2px; margin: auto;">
+		
+		<div class="content-sec" style="padding: 0px 15px;">
+			<h5 style="font-size: 20px; font-family: sans-serif; color: #333333; text-align: center; margin: 30px 0px;">{{ email_title }}</h5>
+			
+			<p style="font-size: 14px; font-family: sans-serif; line-height: 24px; color: rgba(19, 19, 19, .64); text-align: center; margin-top: 0; margin-bottom: 15px;">{{ email_body }} Tu <b></b> cuenta ha sido creada.</p>
+		</div>
+		<p style="font-size: 14px; font-family: sans-serif; line-height: 24px; color: rgba(19, 19, 19, .64); margin-top: 30px; margin-bottom: 30px;">Hola, {{ user.first_name| default:user.username }}, Utiliza el siguiente link para Activar tu Cuenta.</p>
+		<div class="btn-sec" style="text-align: center; margin-bottom: 30px;">
+			
+		</div>
+		<p style="font-size: 14px; font-family: sans-serif; line-height: 24px; color: rgba(19, 19, 19, .64); margin: 0px;">Si te registraste por error, ignora este mensaje.</p>
+		<p style="font-size: 14px; font-family: sans-serif; line-height: 24px; color: rgba(248, 10, 10, 0.64); margin: 0px;">Su código de activación es:  <h2>{{key_Code}}</h2></p>
+		<p style="font-size: 14px; font-family: sans-serif; line-height: 24px; color: rgba(19, 19, 19, .64); margin: 0px 0px 30px; 0px;">Si el botón no funciona, copia y pega el siguiente link en la barra de direcciones de tu navegador:</p>
+		
+		<div class="footer-sec" style="padding-top: 30px; border-top: 1px solid rgba(151, 151, 151, .16);">
+			<p style="font-size: 14px; text-align: center; font-family: sans-serif; line-height: 24px; color: rgba(19, 19, 19, .64); margin: 0px;">Este email fue generado automáticamente, por favor no lo respondas.</p>
+		</div>
+	</div>
+</body>
+</html>

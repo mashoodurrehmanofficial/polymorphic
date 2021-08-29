@@ -1,0 +1,121 @@
+{% extends 'master.html' %}
+
+{% load extras %}
+
+{% block page-title %}Información del Usuario{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información del Usuario</h1>
+    <ul>
+        <li><a href="{% url "usuarios" %}">Inicio</a></li>
+        <li>Editar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <form method="post" action="{% url "usuarios.update" usuario.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>
+                <div class="card-body">
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="first_name">Nombre<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" required value="{{ usuario.first_name }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="last_name">Apellidos<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" required value="{{ usuario.last_name }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="email">Email<span style="color: red;">(*)</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required value="{{ usuario.email }}">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="username">Usuario<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="username" name="username" required value="{{ usuario.username }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="password">Password<span style="color: red;">(*)</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required value="{{ usuario.password }}">
+                            <ul id="password_length" class="parsley-errors-list filled">
+                                <li class="text-secondary" style="margin-top: 10px;">
+                                    La longitud mínima es de 8 caracteres.
+                                </li>
+                            </ul>
+                            <ul id="password_valid" style="display: none;" class="parsley-errors-list filled">
+                                <li class="parsley-required">
+                                    La contraseña debe incluir un carácter especial y un carácter y un número en mayúscula.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="rol">Rol<span style="color: red;">(*)</span></label>
+                            <select name="rol" id="rol" class="form-control" required>
+                                <option selected disabled>--</option>
+                                <option value="admin" {% if usuario.rol == "Administradores" %}selected{% endif %}>Administrador</option>
+                                <option value="obrero" {% if usuario.rol == "Obreros" %}selected{% endif %}>Obrero</option>
+                            </select>
+                        </div>
+                    </div>  
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label for="foto">Foto<span style="color: red;">(*)</span></label>
+                            <input id="foto" name="foto" type="file" class="dropify" {% if usuario.usuarioinfo.foto is not None %}data-default-file="{{ usuario.usuarioinfo.foto_url }}"{% endif %} />
+                            <input id="foto_old" name="foto_old" type="hidden" value="{{ usuario.usuarioinfo.foto }}" />
+                        </div>
+                    </div>                                       
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row text-right">
+                            <div class="col-lg-12 ">
+                                <button type="submit" class="btn btn-primary btn-rounded m-1">Guardar</button>
+                                <a href="{% url "usuarios" %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    $('.dropify').dropify({
+        messages: {
+            'default': 'Drag and drop a file here or click',
+            'replace': 'Drag and drop or click to replace',
+            'remove':  'Remove',
+            'error':   'Ooops, something wrong happended.'
+        }
+    }).on('dropify.afterClear', function(event, element){
+        $("#foto_old").val("");
+    });
+
+    $("#password").on('keyup', function(e) {
+        var pass = $("#password").val();
+        var valid = pass.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/);
+        
+        if (pass.length > 8 && valid != null) {
+            $("#password_valid").css("display", "none");
+            $("#password_length").css("display", "none");
+            $('#btn_submit').prop('disabled', false);
+        } else {
+            $("#password_valid").css("display", "block"); 
+            $('#btn_submit').prop('disabled', true);
+        }
+        
+    });
+
+</script>
+{% endblock %}

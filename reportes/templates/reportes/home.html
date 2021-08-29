@@ -1,0 +1,363 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Reportes{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Reportes</h1>
+    <ul>
+        <li><a href="{% url "toros" %}">Inicio</a></li>
+        <li>Listado</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="card text-left">
+                    <div class="card-header bg-transparent">                    
+                        <div class="row">
+                            <div class="form-group col-sm-4 col-12">
+                                <label for="tipo_reporte">Tipo de Reporte</label>
+                                <select name="tipo_reporte" id="tipo_reporte" class="form-control">
+                                    <option value="">- Seleccione-</option>
+                    
+                                    <option value="crias_produccion_vaca">Vacas - Producción y no. de crías</option>
+                                    <option value="crias_vaca">Vacas - Crías</option>
+                                    <option value="crias_data">Crías</option>
+                                    <option value="preñez_vaca">Vacas - Preñez</option>
+                                    <option value="lote_vacas">Vacas por Lote</option>
+                                    <option value="crias_toro">Toros - Tiempo de servicio y crías</option>
+                                    <option value="costo_toro">Toros - Costo</option>
+                                    <option value="pajuelas_costo">Pajuelas</option>
+                                    <option value="pajuelas_buen_estado">Pajuelas en Buen estado</option>
+                                    <option value="pajuelas_mal_estado">Pajuelas en Mal estado</option>
+                                    <option value="toros_activos">Toros Activos</option>
+                                    <option value="toros_descartados">Toros Descartados</option>
+                                    <option value="vacas_y_crías">Todas las vacas y crías mayores de 16 meses</option>
+                                    <option value="possible_pregnant">Todas las hembras que se pueden preñar</option>
+                                    <option value="reportes_gráficos">Reportes gráficos</option>
+                                    <option value="dados_de_baja">dados de baja</option>
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Resultados</h4>
+                        <div class="card-header bg-transparent" id="crias_produccion_vaca_val" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="nombre">Edad</label>
+                                    <select class="form-control" id="edad_sel" name="edad" required>
+                                        <option value="">-----</option>
+                                        {% for vaca in vacas %}
+                                        <option value="{{ vaca.fecha_nacimiento|date:'dmY'}}">{{ vaca.fecha_nacimiento|timesince:current_time }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3 text-left">
+                                    <label for="nombre">Razas</label>
+                                    <select class="form-control" id="razas_sel" name="razas" required>
+                                        <option value="">-----</option>
+                                        {% for vaca in vacas %}
+                                        <option value="{{ vaca.raza }}">{{ vaca.raza }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="nombre">Rango de fechas</label>
+                                    <input class="input-sm form-control" type="text" name="daterange" id="daterange_sel" value=""/>
+                                </div>
+                                <div class="col-md-1 text-right">
+                                    <button type="button" class="btn btn-primary btn-md btn-rounded m-1 btn_filter">Filtrar</a>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="card-header bg-transparent" id="lote_vaca_val" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="nombre">Lote</label>
+                                    <select class="form-control js-example-basic-single" multiple="multiple" id="lote_sel" name="lote" required>
+                                        
+                                        {% for lote in lotes %}
+                                        <option value="{{ lote.nombre}}">{{ lote.nombre|default_if_none:"" }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-1 text-right">
+                                    <button type="button" class="btn btn-primary btn-md btn-rounded m-1 bltn_filter">Filtrar</a>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="card-header bg-transparent" id="toro_val" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="nombre">Raza</label>
+                                    <select class="form-control"  id="raza_sel" name="raza" required>
+                                        <option value="">---</option>
+                                        {% for toro in toros %}
+                                        <option value="{{ toro.raza}}">{{ toro.raza|default_if_none:"" }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="nombre">Edad</label>
+                                    <select class="form-control" id="tedad_sel" name="tedad" required>
+                                        <option value="">---</option>
+                                        {% for toro in toros %}
+                                        <option value="{{ toro.fecha_nacimiento|date:'dmY'}}">{{ toro.fecha_nacimiento|timesince:current_time|default_if_none:"" }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-1 text-right">
+                                    <button type="button" class="btn btn-primary btn-md btn-rounded m-1 bttn_filter">Filtrar</a>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="table-responsive" id="table_item">
+                            <table class="table" id="tabla_reporte">
+                            </table>
+                            
+                        </div>
+                        <div id="graphic_report"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- end of col-->
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $('.js-example-basic-single').select2();
+    var title;
+    $("#tipo_reporte").change(function() {
+        if ($(this).val() == "reportes_gráficos"){
+            $("#crias_produccion_vaca_val").hide();
+            $("#table_item").hide();
+            $("#graphic_report").show();
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "graphic_production" %}',
+                data: {
+                    
+                },
+                type: 'POST',
+                success: function (data) {
+                    $("#graphic_report").html(data)
+                }
+            });
+        
+
+        } else {
+            $("#table_item").show();
+            $("#graphic_report").hide();
+            if ($(this).val() == "crias_produccion_vaca") {
+            $("#crias_produccion_vaca_val").css("display", "block");
+            $("#edad_sel option:selected").prop("selected", false);
+            $("#razas_sel option:selected").prop("selected", false);
+            $("#lote_vaca_val").css("display", "none");
+            $("#toro_val").css("display", "none");
+        } else if ($(this).val() == "lote_vacas") {
+            $("#lote_vaca_val").css("display", "block");
+            $("#crias_produccion_vaca_val").css("display", "none");
+            $("#toro_val").css("display", "none");
+        } else if ($(this).val() == "costo_toro"){
+            $("#toro_val").css("display", "block");
+            $("#lote_vaca_val").css("display", "none");
+            $("#crias_produccion_vaca_val").css("display", "none");
+        } 
+        else {
+            $("#crias_produccion_vaca_val").css("display", "none");
+            $("#lote_vaca_val").css("display", "none");
+            $("#toro_val").css("display", "none");
+        }
+        $('.js-example-basic-single').select2();
+        title = $(":selected", this).text();
+
+        $.ajax({
+            url: $(this).val(),
+            type: "get",
+            dataType: "json",
+            success: function(response) {
+                initializeDT(response.headers, response.data, title);
+                if (response.message != null) {
+                    swal({
+                        text: response.message,
+                        type: "warning",
+                        buttonsStyling: false,
+                        confirmButtonClass: 'btn btn-lg btn-warning',
+                    }); 
+                }
+            },
+            error: function(data) {
+                console.log(data);
+            }
+        });
+        }
+        
+    });
+    var dt = null;
+    function initializeDT($header, $data, $title) {
+        if ( dt !== null ) {            
+            dt.destroy();
+            $('#tabla_reporte').html('');
+        }
+        dt = $('#tabla_reporte').DataTable({
+            order: [],
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
+                buttons: {
+                    colvisRestore: "- Restaurar Columnas -",
+                    copy: 'Copiar',
+                    copyTitle: 'Ajouté au presse-papiers',
+                    copyKeys: 'Appuyez sur <i>ctrl</i> ou <i>\u2318</i> + <i>C</i> pour copier les données du tableau à votre presse-papiers. <br><br>Pour annuler, cliquez sur ce message ou appuyez sur Echap.',
+                    copySuccess: {
+                        _: '%d lignes copiées',
+                        1: '1 ligne copiée'
+                    }
+                }
+            },
+            dom: 'Bfrtip',
+            columns: $header,
+            data: $data,
+            buttons: [
+                {
+                    extend: 'copyHtml5',
+                    exportOptions: {
+                        columns: ':visible'
+                    },
+                    title: $title
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: ':visible'
+                    },
+                    title: $title
+                },
+                {
+                    extend: 'pdfHtml5',
+                    exportOptions: {
+                        columns: ':visible'
+                    },
+                    title: $title
+                },
+                {
+                    extend: 'colvis',
+                    text: "Columnas",
+                    postfixButtons: [ 'colvisRestore' ]
+                }
+            ],
+        });
+    };
+    $(".btn_filter").on('click', function(e){
+        if ($("#razas_sel").val() == null && $("#edad_sel").val() == null && $("#daterange_sel").val() == "") {
+            
+        } else {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_filter_produccion_vaca" %}',
+                data: {
+                    "razas": $("#razas_sel").val(),
+                    "edad": $("#edad_sel").val(),
+                    'daterange': $("#daterange_sel").val()
+                },
+                type: 'POST',
+                success: function(response) {
+                    initializeDT(response.headers, response.data, title);
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }
+    });
+    $(".bltn_filter").on('click', function(e){
+        if ($("#lote_sel").val().length == 0) {
+            
+        } else {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_lote_vacas" %}',
+                data: {
+                    "lotes": $("#lote_sel").val(),
+                },
+                type: 'POST',
+                dataType: "json",
+                success: function(response) {
+                    initializeDT(response.headers, response.data, title);
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }
+    });
+    $(".bttn_filter").on('click', function(e){
+        if ($("#tedad_sel").val() == "" && $("#raza_sel").val() == "") {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_toro" %}',
+                data: {
+                    "raza": $("#raza_sel").val(),
+                    "edad": $("#tedad_sel").val(),
+                },
+                type: 'POST',
+                dataType: "json",
+                success: function(response) {
+                    initializeDT(response.headers, response.data, title);
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        } else {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_toro" %}',
+                data: {
+                    "raza": $("#raza_sel").val(),
+                    "edad": $("#tedad_sel").val(),
+                },
+                type: 'POST',
+                dataType: "json",
+                success: function(response) {
+                    initializeDT(response.headers, response.data, title);
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }
+    });
+    
+    $('input[name="daterange"]').daterangepicker(
+        {
+            format: 'DD.MM.YYYY',
+            howDropdowns: true,
+            showWeekNumbers: true,
+            timePicker: false,
+            timePickerIncrement: 1,
+            timePicker12Hour: true,
+            locale: {
+                applyLabel: 'Aceptar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Custom',
+                daysOfWeek: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sáb'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                firstDay: 1
+            }
+        }, 
+    );
+</script>
+{% endblock %}

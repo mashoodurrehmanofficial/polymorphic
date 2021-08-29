@@ -1,0 +1,112 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Produccion{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Produccion</h1>
+    <ul>
+        <li><a href="{% url "produccion" %}">Inicio</a></li>
+        <li>Listado</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="card text-left">
+                    <div class="card-header bg-transparent">  
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="nombre">Rango de fechas</label>
+                                <input class="input-sm form-control" type="text" name="daterange" id="daterange_sel" value=""/>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="nombre">Vaca</label>
+                                <select class="form-control" id="vaca_sel" name="vaca" required>
+                                    <option disabled selected>-----</option>
+                                    {% for produccion in producciones %}
+                                    <option value="{{ produccion.vaca.id}}">{{ produccion.vaca.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-primary btn-md btn-rounded m-1 btn_filter">Filtrar</a>
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <a href="{% url "produccion.add" %}" class="btn btn-primary btn-md btn-rounded m-1"><i class="i-Add text-white mr-2"></i> Agregar</a>
+                            </div>
+                        </div>                  
+                    </div>
+                    <div id="ajax_produccion">
+
+                    </div>
+                </div>
+            </div>
+            <!-- end of col-->
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    ajax_all_Produccion();
+    
+    function ajax_all_Produccion() {
+        $.ajax({
+			headers: { "X-CSRFToken": '{{csrf_token}}' },
+			url: '{% url "ajax_all_produccion" %}',
+			data: {
+				
+			},
+			type: 'POST',
+			success: function (data) {
+				$("#ajax_produccion").html(data)
+			}
+		});
+    };
+    $(".btn_filter").on('click', function(e){
+        
+        if ($("#vaca_sel").val() == null && $("#daterange_sel").val() == "") {
+            location.reload();
+        } else {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_filter_produccion" %}',
+                data: {
+                    "vaca": $("#vaca_sel").val(),
+                    'daterange': $("#daterange_sel").val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    $("#ajax_produccion").html(data)
+                }
+            });
+        }
+    });
+    $('input[name="daterange"]').daterangepicker(
+        {
+            format: 'DD.MM.YYYY',
+            howDropdowns: true,
+            showWeekNumbers: true,
+            timePicker: false,
+            timePickerIncrement: 1,
+            timePicker12Hour: true,
+            locale: {
+                applyLabel: 'Aceptar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Custom',
+                daysOfWeek: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sáb'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                firstDay: 1
+            }
+        }, 
+    );
+</script>
+{% endblock %}

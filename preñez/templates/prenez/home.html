@@ -1,0 +1,126 @@
+{% extends 'master.html' %}
+
+{% load extras %}
+
+{% block page-title %}Preñez{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Preñez</h1>
+    <ul>
+        <li><a href="{% url "preñez" %}">Inicio</a></li>
+        <li>Listado</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="card text-left">
+                    <div class="card-header text-right bg-transparent">                    
+                        <a href="{% url "preñez.add" %}" class="btn btn-primary btn-md btn-rounded m-1"><i class="i-Add text-white mr-2"></i> Agregar</a>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Listado</h4>
+                        <p>Resumen de la información referente</p>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Fecha</th>
+                                        <th scope="col">Vaca</th>
+                                        <th scope="col">Método</th>
+                                        <th scope="col">Selección</th>
+                                        <th scope="col">Creado</th>
+                                        <th scope="col">Actualizo</th>
+                                        <th scope="col">Usuario</th>
+                                        {% if 'preñez.change_preñez' in perms %}
+                                        <th scope="col">Acciones</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for fecundacion in fecundaciones %}
+                                    <tr data-id="{{ fecundacion.id }}">
+                                        <td>{{ fecundacion.id }}</td>
+                                        <td>{{ fecundacion.fecha_preñez }}</td>
+                                        <td>{{ fecundacion.vaca.nombre }}</td>
+                                        <td>{{ fecundacion.fecundaciones.all.0 | to_class_name }}</td>
+                                        <td>{{ fecundacion.fecundaciones.all.0.nombre }}</td>
+                                        <td>{{ fecundacion.created_at|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ fecundacion.updated_at|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ fecundacion.usuario.first_name }} {{ fecundacion.usuario.last_name }}</td>
+                                        {% if 'preñez.change_preñez' in perms %}
+                                        <td>
+                                            <a href="{% url "preñez.update" fecundacion.id %}" class="text-success mr-2">
+                                                <i class="nav-icon i-Pen-2 font-weight-bold"></i>
+                                            </a>
+                                            <a onclick="confirm_delete('{% url "preñez.delete" fecundacion.id %}', {{ fecundacion.id }})" href="#" class="text-danger mr-2">
+                                                <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                                            </a>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end of col-->
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $('.table').DataTable({
+        order: [[ 0, 'asc' ]],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
+            buttons: {
+                colvisRestore: "- Restaurar Columnas -",
+                copy: 'Copiar',
+                copyTitle: 'Ajouté au presse-papiers',
+                copyKeys: 'Appuyez sur <i>ctrl</i> ou <i>\u2318</i> + <i>C</i> pour copier les données du tableau à votre presse-papiers. <br><br>Pour annuler, cliquez sur ce message ou appuyez sur Echap.',
+                copySuccess: {
+                    _: '%d lignes copiées',
+                    1: '1 ligne copiée'
+                }
+            }
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'copyHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'pdfHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'colvis',
+                text: "Columnas",
+                postfixButtons: [ 'colvisRestore' ]
+            }
+        ],
+    });
+</script>
+{% endblock %}

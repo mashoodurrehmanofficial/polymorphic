@@ -1,0 +1,91 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Información de la Cria{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información de la Cria</h1>
+    <ul>
+        <li><a href="{% url "crias" %}">Inicio</a></li>
+        <li>Editar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <form method="post" action="{% url "crias.update" cria.id %}">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>
+                <div class="card-body">
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="vaca_id">Vaca<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="vaca_id" required>
+                                <option>--</option>
+                                {% for vaca in vacas %}
+                                <option value="{{ vaca.id }}" {% if cria.vaca_id == vaca.id %} selected {% endif %}>{{ vaca.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="nombre">Nombre<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ cria.nombre|default_if_none:'' }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="raza">Raza<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="raza" name="raza" value="{{ cria.raza|default_if_none:'' }}">
+                        </div> 
+                    </div>
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="fecha_nacimiento">Fecha de Nacimiento<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_nacimiento" name="fecha_nacimiento" required value="{{ cria.fecha_nacimiento|date:"Y-m-d" }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="sexo">Sexo<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="sexo" required>
+                                <option value="Hembra" {% if cria.sexo == 'Hembra' %} selected {% endif %}>Hembra</option>
+                                <option value="Macho" {% if cria.sexo == 'Macho' %} selected {% endif %}>Macho</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="nacimiento">Nació<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="nacimiento" required>
+                                <option value="Vivo" {% if cria.sexo == 'Vivo' %} selected {% endif %}>Vivo</option>
+                                <option value="Muerto" {% if cria.sexo == 'Muerto' %} selected {% endif %}>Muerto</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="destino">Destino<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="destino" required>
+                                <option value="Criar" {% if cria.sexo == 'Criar' %} selected {% endif %}>Criar</option>
+                                <option value="Vender" {% if cria.sexo == 'Vender' %} selected {% endif %}>Vender</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row">
+                            <div class="col-3">
+                                {% if cria.vaca_madura_id is None %}
+                                <button type="submit" class="btn btn-warning btn-rounded m-1" name="pasar_vaca" value="1">Pasar a Vaca</button>
+                                {% endif %}
+                            </div>
+                            <div class="col-9 text-right">
+                                {% if cria.vaca_madura_id is None %}
+                                <button type="submit" class="btn btn-primary btn-rounded m-1">Guardar</button>
+                                {% endif %}
+                                <a href="{% url "crias" %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

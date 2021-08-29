@@ -1,0 +1,111 @@
+{% load static %}
+<div class="card-body">
+    <h4 class="card-title mb-3">Listado</h4>
+    <p>Resumen de la información referente</p>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">F. Producción</th>
+                    <th scope="col">Cantidad (Litros)</th>
+                    <th scope="col">Vaca</th>
+                    <th scope="col">Calificación</th>
+                    <th scope="col">Creado</th>
+                    <th scope="col">Actualizo</th>
+                    <th scope="col">Usuario</th>
+                    {% if 'produccion.change_produccion' in perms %}
+                    <th scope="col">Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for produccion in producciones %}
+                <tr data-id="{{ produccion.id }}">
+                    <td class="align-middle">{{ produccion.id }}</td>
+                    <td class="align-middle">{{ produccion.fecha_produccion }}</td>
+                    <td class="align-middle">{{ produccion.cantidad }}</td>
+                    <td class="align-middle">{{ produccion.vaca.nombre }}</td>
+                    <td class="align-middle">{{ produccion.calificacion.valor }}</td>
+                    <td class="align-middle">{{ produccion.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td class="align-middle">{{ produccion.updated_at|date:"Y-m-d H:i:s" }}</td>
+                    <td class="align-middle">{{ produccion.usuario.first_name }} {{ produccion.usuario.last_name }}</td>
+                    {% if 'produccion.change_produccion' in perms %}
+                    <td class="align-middle">
+                        <a href="{% url "produccion.update" produccion.id %}" class="text-success mr-2">
+                            <i class="nav-icon i-Pen-2 font-weight-bold"></i>
+                        </a>
+                        <a onclick="confirm_delete('{% url "produccion.delete" produccion.id %}', {{ produccion.id }})" href="#" class="text-danger mr-2">
+                            <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            {% if sum_produccion %}
+            <tr>
+                <td style="color: red;">Todo</td>
+                <td></td>
+                <td>
+                    {{sum_produccion.cantidad__sum|default_if_none:0}}
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              
+            </tr>
+            {% else %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% block scripts %}
+<script>
+    $('.table').DataTable({
+        order: [[ 0, 'asc' ]],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
+            buttons: {
+                    colvisRestore: "- Restaurar Columnas -",
+                    copy: 'Copiar',
+                    copyTitle: 'Ajouté au presse-papiers',
+                    copyKeys: 'Appuyez sur <i>ctrl</i> ou <i>\u2318</i> + <i>C</i> pour copier les données du tableau à votre presse-papiers. <br><br>Pour annuler, cliquez sur ce message ou appuyez sur Echap.',
+                    copySuccess: {
+                        _: '%d lignes copiées',
+                        1: '1 ligne copiée'
+                    }
+                }
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'copyHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'pdfHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'colvis',
+                text: "Columnas",
+                postfixButtons: [ 'colvisRestore' ]
+            }
+        ],
+    });
+</script>
+{% endblock %}

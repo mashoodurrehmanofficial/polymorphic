@@ -1,0 +1,161 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Información del Usuario{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información del Usuario</h1>
+    <ul>
+        <li><a href="{% url "usuarios" %}">Inicio</a></li>
+        <li>Agregar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <div class="card-header text-right bg-transparent">                    
+                <button id="generate_code" class="btn btn-primary btn-md btn-rounded m-1">Generar codigo</button>
+            </div>
+            <form method="post" action="{% url "usuarios.add" %}">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>
+                
+                <div class="card-body">
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="first_name">Nombre<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" required>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="last_name">Apellidos<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="email">Email<span style="color: red;">(*)</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="username">Usuario<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="password">Password<span style="color: red;">(*)</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <ul id="password_length" class="parsley-errors-list filled">
+                                <li class="text-secondary" style="margin-top: 10px;">
+                                    La longitud mínima es de 8 caracteres.
+                                </li>
+                            </ul>
+                            <ul id="password_valid" style="display: none;" class="parsley-errors-list filled">
+                                <li class="parsley-required">
+                                    La contraseña debe incluir un carácter especial y un carácter y un número en mayúscula.
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="username">Código de verificación<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="code" name="code" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="rol">Rol<span style="color: red;">(*)</span></label>
+                            <select name="rol" id="rol" class="form-control" required>
+                                <option selected disabled>--</option>
+                                <option value="admin">Administrador</option>
+                                <option value="obrero">Obrero</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row text-right">
+                            <div class="col-lg-12 ">
+                                <input type="submit" id="btn_submit" class="btn btn-primary btn-rounded m-1" value="Guardar"></input>
+                                <a href="{% url 'usuarios' %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $("#password").on('keyup', function(e) {
+        var pass = $("#password").val();
+        var valid = pass.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/);
+        
+        if (pass.length > 8 && valid != null) {
+            $("#password_valid").css("display", "none");
+            $("#password_length").css("display", "none");
+            $('#btn_submit').prop('disabled', false);
+        } else {
+            $("#password_valid").css("display", "block"); 
+            $('#btn_submit').prop('disabled', true);
+        }
+        
+    });
+    $("#generate_code").on("click", function(){
+        $.ajax({
+            headers: { "X-CSRFToken": '{{csrf_token}}' },
+            url: '{% url "generateCode" %}',
+            dataType: "json",
+            method: "POST",
+            data:{
+
+            },
+            success: function(data) {  
+                swal({
+                    text: "Código de verificación:  " + data.code,
+                    type: "success",
+                    buttonsStyling: false,
+                    confirmButtonClass: 'btn btn-lg btn-success',
+                });             
+            }
+        });
+
+    })
+    $("#metodo").on("change", function() {
+        if ( $(this).val() == "toro") {            
+            $.ajax({
+                url: '{% url "obtenerToros" %}',
+                dataType: "json",
+                success: function(result) {
+                    $("#metodo_id").empty();
+                    $("#metodo_id").append("<option selected disabled>--</option>");
+                    $.each(result, function(i, t) {
+                        $("#metodo_id").append($("<option>", {
+                            text: t.nombre,
+                            value: t.id
+                        }));
+                    })                    
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: '{% url "obtenerPajuelas" %}',
+                dataType: "json",
+                success: function(result) {
+                    $("#metodo_id").empty();
+                    $("#metodo_id").append("<option selected disabled>--</option>");
+                    $.each(result, function(i, t) {
+                        $("#metodo_id").append($("<option>", {
+                            text: t.nombre,
+                            value: t.id
+                        }));
+                    })                    
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

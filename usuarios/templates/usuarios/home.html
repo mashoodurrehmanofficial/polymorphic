@@ -1,0 +1,123 @@
+{% extends 'master.html' %}
+
+{% load extras %}
+
+{% block page-title %}Usuarios{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Usuarios</h1>
+    <ul>
+        <li><a href="{% url "usuarios" %}">Inicio</a></li>
+        <li>Listado</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="card text-left">
+                    <div class="card-header text-right bg-transparent">                    
+                        <a href="{% url "usuarios.add" %}" class="btn btn-primary btn-md btn-rounded m-1"><i class="i-Add text-white mr-2"></i> Agregar</a>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Listado</h4>
+                        <p>Resumen de la información referente</p>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Foto</th>
+                                        <th scope="col">Nombre</th>
+                                        <th scope="col">Apellidos</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Rol</th>
+                                        <th scope="col">Creado</th>
+                                        <th scope="col">Último acceso</th>
+                                        <th scope="col">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for usuario in usuarios %}
+                                    <tr data-id="{{ usuario.id }}">
+                                    <td>{{ usuario.id }}</td>
+                                        <td>{% if usuario.usuarioinfo.foto %}<a href="{{ usuario.usuarioinfo.foto_url }}" data-fancybox><img src="{{ usuario.usuarioinfo.foto_url }}" class="img-fluid" width="50" /></a>{% endif %}</td>
+                                        <td>{{ usuario.first_name }}</td>
+                                        <td>{{ usuario.last_name }}</td>
+                                        <td>{{ usuario.email }}</td>
+                                        <td>{% if usuario.rol == "Administradores" %}Administrador{% else %}Obrero{% endif %}</td>
+                                        <td>{{ usuario.date_joined|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ usuario.last_login|date:"Y-m-d H:i:s" }}</td>
+                                        <td>
+                                            <a href="{% url "usuarios.update" usuario.id %}" class="text-success mr-2">
+                                                <i class="nav-icon i-Pen-2 font-weight-bold"></i>
+                                            </a>
+                                            <a onclick="confirm_delete('{% url "usuarios.delete" usuario.id %}', {{ usuario.id }})" href="#" class="text-danger mr-2">
+                                                <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end of col-->
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $('.table').DataTable({
+        order: [[ 0, 'asc' ]],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
+            buttons: {
+                    colvisRestore: "- Restaurar Columnas -",
+                    copy: 'Copiar',
+                    copyTitle: 'Ajouté au presse-papiers',
+                    copyKeys: 'Appuyez sur <i>ctrl</i> ou <i>\u2318</i> + <i>C</i> pour copier les données du tableau à votre presse-papiers. <br><br>Pour annuler, cliquez sur ce message ou appuyez sur Echap.',
+                    copySuccess: {
+                        _: '%d lignes copiées',
+                        1: '1 ligne copiée'
+                    }
+                }
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'copyHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'pdfHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'colvis',
+                text: "Columnas",
+                postfixButtons: [ 'colvisRestore' ]
+            }
+        ],
+        
+    });
+</script>
+{% endblock %}

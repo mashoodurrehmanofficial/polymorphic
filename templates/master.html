@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" dir="">
+
+{% load static %}
+{% load extras %}
+{% load i18n %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block page-title %}Blank Page{% endblock %} | Sistema Ganadero</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,400i,600,700,800,900" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'assets/styles/css/themes/lite-purple.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/perfect-scrollbar.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/sweetalert2.min.css' %}"> 
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/parsley/parsley.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/datatables.min.css' %}">    
+    {% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">  {% endcomment %}
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/pickadate/classic.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/pickadate/classic.date.css' %}">             
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/dropzone.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css" 
+    integrity="sha512-EZSUkJWTjzDlspOoPSpUFR0o0Xy7jdzW//6qhUkoZ9c4StFkVsp9fbbd0O06p9ELS3H486m4wmrCELjza4JEog==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha512-H9jrZiiopUdsLpg94A333EfumgUBpO9MdbxStdeITo+KEIMaNfHNvwyjjDJb+ERPaRS6DpyRlKbvPUasNItRyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <link href="{% static 'assets/styles/css/daterangepicker/daterangepicker-bs3.css' %}" rel="stylesheet">
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    
+</head>
+
+<body class="text-left">
+
+    {% csrf_token %}
+
+    <!-- Pre Loader Strat  -->
+    <div class='loadscreen' id="preloader">
+
+        <div class="loader spinner-bubble spinner-bubble-primary">
+
+
+
+        </div>
+    </div>
+    <!-- Pre Loader end  -->
+
+
+    <div class="app-admin-wrap layout-sidebar-large">
+        <div class="main-header">
+            <div class="logo">
+                <img src="{% static 'assets/images/logo.png' %}" alt="">
+            </div>
+
+            <div class="menu-toggle">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <!-- Mega menu -->
+            </div>
+
+            <div style="margin: auto"></div>
+
+            <div class="header-part-right">
+                <!-- Full screen toggle -->
+                <i class="i-Full-Screen header-icon d-none d-sm-inline-block" data-fullscreen></i>
+                <!-- Grid menu Dropdown -->
+
+                <!-- User avatar dropdown -->
+                <div class="dropdown">
+                    <div class="user col align-self-end">
+                        {% comment %} <img src="{% static 'assets/images/faces/1.jpg' %}" id="userDropdown" alt="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {% endcomment %}
+                        <img src="{% if user.usuarioinfo.foto is None %}{% static 'assets/images/faces/user.png' %}{% else %}{{ user.usuarioinfo.foto_url }}{% endif %}" id="userDropdown" alt="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                            <div class="dropdown-header">
+                                <i class="i-Lock-User mr-1"></i> {{ user.first_name|addstr:' '|addstr:user.last_name }}
+                            </div>
+                            <a class="dropdown-item" href="{% url "logout" %}">Salir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- header top menu end -->
+
+        <div class="side-content-wrap">
+            <div class="sidebar-left open rtl-ps-none" data-perfect-scrollbar data-suppress-scroll-x="true">
+                <ul class="navigation-left">
+                    <li class="nav-item" data-item="vacas">
+                        <a class="nav-item-hold" href="#">
+                            {% comment %} <i class="nav-icon i-iOS-Apple"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/vacas.jpg" %} class="img-fluid">
+                            <span class="nav-text">Vacas</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="alimento">
+                        <a class="nav-item-hold" href="#">
+                            {% comment %} <i class="nav-icon i-iOS-Apple"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/alimento.jpg" %} class="img-fluid">
+                            <span class="nav-text">Alimento</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="crias">
+                        <a class="nav-item-hold" href="#">
+                            {% comment %} <i class="nav-icon i-iOS-Apple"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/crias.jpg" %} class="img-fluid">
+                            <span class="nav-text">Crías</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="produccion">
+                        <a class="nav-item-hold" href="#">
+                            {% comment %} <i class="nav-icon i-iOS-Apple"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/produccion.jpg" %} class="img-fluid">
+                            <span class="nav-text">Producción</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+
+                    <li class="nav-item" data-item="preñez">
+                        <a class="nav-item-hold" href="#">
+                            {% comment %} <i class="nav-icon i-iOS-Apple"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/preñez.gif" %} class="img-fluid">
+                            <span class="nav-text">Preñez</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="toros">
+                        <a class="nav-item-hold" href="{% url "toros" %}">
+                            {% comment %} <i class="nav-icon i-iOS-Apple"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/toros.png" %} class="img-fluid">
+                            <span class="nav-text">Toros</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="pajuelas">
+                        <a class="nav-item-hold" href="{% url "pajuelas" %}">
+                            {% comment %} <i class="nav-icon i-iOS-Apple"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/pajuelas.jpg" %} class="img-fluid">
+                            <span class="nav-text">Pajuelas</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="lotes">
+                        <a class="nav-item-hold" href="{% url "lotes" %}">
+                            <img src={% static "assets/fotos/lotes.jpg" %} class="img-fluid">
+                            <span class="nav-text">Lotes</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    {% if 'auth.view_session' in perms %}
+                    <li class="nav-item">
+                        <a class="nav-item-hold" href="{% url "reportes" %}">
+                            <i class="nav-icon i-File"></i>
+                            <span class="nav-text">Reportes</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    <li class="nav-item" data-item="usuarios">
+                        <a class="nav-item-hold" href="#">
+                            {% comment %} <i class="nav-icon i-Administrator"></i> {% endcomment %}
+                            <img src={% static "assets/fotos/usuarios.png" %} class="img-fluid">
+                            <span class="nav-text">Usuarios</span>
+                        </a>
+                        <div class="triangle"></div>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="sidebar-left-secondary rtl-ps-none" data-perfect-scrollbar data-suppress-scroll-x="true">
+                <!-- Submenu Dashboards -->
+                <ul class="childNav" data-parent="vacas">
+                    <li class="nav-item">
+                        <a href="{% url "vacas" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "vacas.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="crias">
+                    <li class="nav-item">
+                        <a href="{% url "crias" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "crias.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="toros">
+                    <li class="nav-item">
+                        <a href="{% url "toros" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "toros.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="pajuelas">
+                    <li class="nav-item">
+                        <a href="{% url "pajuelas" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "pajuelas.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="alimento">
+                    <li class="nav-item">
+                        <a href="{% url "alimento" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "alimento.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "alimento.export" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Consumo</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="produccion">
+                    <li class="nav-item">
+                        <a href="{% url "produccion" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "produccion.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="preñez">
+                    <li class="nav-item">
+                        <a href="{% url "preñez" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "preñez.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="lotes">
+                    <li class="nav-item">
+                        <a href="{% url "lotes" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "lotes.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="childNav" data-parent="usuarios">
+                    <li class="nav-item">
+                        <a href="{% url "usuarios" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Listado</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url "usuarios.add" %}">
+                            <i class="nav-icon i-Clock-3"></i>
+                            <span class="item-name">Agregar</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="sidebar-overlay"></div>
+        </div>
+        <!--=============== Left side End ================-->
+
+        <!-- ============ Body content start ============= -->
+        <div class="main-content-wrap sidenav-open d-flex flex-column">
+            <div class="main-content">
+                {% block breadcrumbs %}
+                <div class="breadcrumb">
+                    <h1>Blank Page</h1>
+                    <ul>
+                        <li><a href="">UI Kits</a></li>
+                        <li>Blank Page</li>
+                    </ul>
+                </div>
+                {% endblock %}
+
+                <div class="separator-breadcrumb border-top"></div>
+
+                <!-- content goes here -->
+                {% block content %}
+                Inicio
+                {% endblock %}
+
+            </div>
+            <!-- end of main content -->
+
+            <!-- Footer Start -->
+            <div class="flex-grow-1"></div>
+            <div class="app-footer">
+                <div class="footer-bottom border-top pt-3 d-flex flex-column flex-sm-row align-items-center">
+                    <span class="flex-grow-1"></span>
+                    <div class="d-flex align-items-center">
+                        <img class="logo" src="{% static 'assets/images/logo.png' %}" alt="">
+                        <div>
+                            <p class="m-0">&copy; 2021 Gull HTML</p>
+                            <p class="m-0">All rights reserved</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- fotter end -->
+        </div>
+        <!-- ============ Body content End ============= -->
+    </div>
+    <!--=============== End app-admin-wrap ================-->
+
+
+    <script src="{% static 'assets/js/vendor/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'assets/js/es5/script.min.js' %}"></script>
+    <script src="{% static 'assets/js/es5/sidebar.large.script.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/parsley/parsley.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/parsley/i18n/es.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/numeric/numeric.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/datatables.min.js' %}"></script>  
+    {% comment %} <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>  
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>   {% endcomment %}
+    <script src="{% static 'assets/js/vendor/pickadate/picker.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/pickadate/picker.date.js' %}"></script>    
+    <script src="{% static 'assets/js/vendor/pickadate/translations/es_ES.js' %}"></script>    
+    <script src="{% static 'assets/js/vendor/dropzone.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js" integrity="sha512-8QFTrG0oeOiyWo/VM9Y8kgxdlCryqhIxVeRpWSezdRRAvarxVtwLnGroJgnVW9/XBRduxO/z1GblzPrMQoeuew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha512-uURl+ZXMBrF4AwGaWmEetzrd+J5/8NRkWAvJx5sbPSSuOb0bZLqf+tOzniObO00BjHa/dD7gub9oCGMLPQHtQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="{% static 'assets/js/custom.js' %}"></script>
+    <script src="{% static 'assets/js/moment.min.js' %}"></script>
+    <script src="{% static 'assets/js/daterangepicker/daterangepicker.js' %}"></script>
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{% static 'assets/js/apexcharts.min.js' %}"></script>
+
+    {% block scripts %}
+    {% endblock %}
+
+    <script>
+        {% for msg in messages %}
+        swal({
+            text: "{{ msg }}",
+            type: "info",
+            buttonsStyling: false,
+            confirmButtonClass: 'btn btn-lg btn-danger',
+        });         
+        {% endfor %} 
+
+        function parsley_fix() {
+            $(".file-input").append($("input[type='file']").next());
+            $(".picker__input").each(function(x,y){$(y).parent().append($("#" + $(y).attr("aria-describedby")));})
+            $(".input-group-prepend").each(function(i, item){ $(item).parent().parent().append($(item).next().next()) });
+        } 
+
+        $('.pickadate').pickadate({
+            format: 'yyyy-mm-dd',
+            formatSubmit: 'yyyy-mm-dd',
+            hiddenName: true,
+            selectYears: 20,
+            selectMonths: true,
+            max: "{% now 'Y-m-d' %}"
+        });
+        $(".double").numeric({ decimalPlaces: 2, negative: false });
+        $(".numeric").numeric({ decimal: false, negative: false });        
+
+        $("form").each(function() {
+                $(this).parsley().on("form:validated", function() {
+                parsley_fix();               
+            });
+        });
+
+    </script>
+</body>
+
+</html>

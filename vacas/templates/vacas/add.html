@@ -1,0 +1,178 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Información de la Vaca{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información de la Vaca</h1>
+    <ul>
+        <li><a href="{% url "vacas" %}">Inicio</a></li>
+        <li>Agregar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <form method="post" action="{% url "vacas.add" %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>
+                <div class="card-body">
+                    <div class="form-group row">                                
+                        <div class="col-lg-4">
+                            <label for="nombre">Nombre<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required value="">
+                        </div>
+
+
+                        <div class="col-lg-4">
+                            <label for="raza">Raza<span style="color: red;">(*)</span></label>
+                            
+                            <select class="form-control" id="raza" name="raza" required value="">
+                                {% for raza in razas %}
+                                <option value="{{raza.nombre}}">{{raza.nombre}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if request.user.is_staff %}
+                        <div class="col-lg-2">
+                            <a href="#" id="raza_add" class="btn btn-primary btn-rounded m-1">Nuevo</a>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                    <div class="form-group row">                                
+                        <div class="col-lg-4">
+                            <label for="fecha_nacimiento">Fecha de Nacimiento<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_nacimiento" name="fecha_nacimiento" required value="">
+                        </div>
+                        {% comment %} <div class="col-lg-4">
+                            <label for="edad">Edad<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control numeric" id="edad" name="edad" required value="">
+                        </div> {% endcomment %}
+                        {% comment %} <div class="col-lg-4">
+                            <label for="tiempo_preñez">Tiempo Preñez<span style="color: red;">(*)</span></label>
+                            <input type="number" max="9" class="form-control numeric" id="tiempo_preñez" name="tiempo_preñez" required value="">
+                        </div> {% endcomment %}
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label for="foto">Foto</label>
+                            <input id="foto" name="foto" type="file" class="dropify" />
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row text-right">
+                            <div class="col-lg-12 ">
+                                <button type="submit" class="btn btn-primary btn-rounded m-1">Guardar</button>
+                                <a href="{% url "vacas" %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="razamodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Raza</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form data-parsley-validate id="razaForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group row">                                
+                            <div class="col-lg-12">
+                                <label for="new_raza">Nuevo Raza<span style="color: red;">(*)</span></label>
+                                <input type="text" class="form-control" id="new_raza" name="new_raza" required value="" required>
+                            </div>
+                        </div>
+                       
+                    </form>
+                    
+                </div>
+                <div class="modal-footer">
+                    <input id="btn_raza_p" type="button" class="btn btn-primary" value="OK">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    $('.dropify').dropify({
+        messages: {
+            'default': 'Drag and drop a file here or click',
+            'replace': 'Drag and drop or click to replace',
+            'remove':  'Remove',
+            'error':   'Ooops, something wrong happended.'
+        }
+    });
+
+    {% comment %} new Dropzone("#single-file-upload", { // Make the whole body a dropzone
+        url: "#", // Set the url
+        autoProcessQueue: false,
+        maxFiles: 1,
+        init: function() {
+            this.on("maxfilesexceeded", function(file) {
+                this.removeAllFiles();
+                this.addFile(file);
+            });
+        }
+    }); {% endcomment %}
+
+    // jQuery
+    {% comment %} Dropzone.options.singleFileUpload = {
+        paramName: "file", // The name that will be used to transfer the file
+        maxFiles: 1,
+        init: function() {
+            this.on("maxfilesexceeded", function(file) {
+                this.removeAllFiles();
+                this.addFile(file);
+            });
+        }
+    }; {% endcomment %}
+
+    $("#raza_add").on('click', function(e){
+        $("#razamodal").modal();
+    });
+    $("#btn_raza_p").on('click', function(e){
+        $("#razaForm").parsley().validate();
+        if ($("#razaForm").parsley().validate() == true) {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_raza_add" %}',
+                data: {
+                    nombre: $("#new_raza").val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    if (data.status=="Success") {
+                        location.reload();
+                    } else {
+                        swal({
+                            text: "Esta raza ya existe",
+                            type: "warning",
+                            buttonsStyling: false,
+                            confirmButtonClass: 'btn btn-lg btn-warning',
+
+                        });
+                    }
+                }
+            });
+        }
+        
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,273 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Alimentos{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Alimentos</h1>
+    <ul>
+        <li><a href="{% url 'alimento' %}">Inicio</a></li>
+        <li>Listado</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="row mb-4">
+            <div class="col-md-8 mb-3">
+                <div class="card text-left">
+                    <div class="card-header bg-transparent"> 
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="nombre">Rango de fechas</label>
+                                <input class="input-sm form-control" type="text" name="daterange" id="daterange_sel" value=""/>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="nombre">Alimento</label>
+                                <select class="form-control" id="name_sel" name="name" required>
+                                    <option disabled selected>-----</option>
+                                    {% for alimento in alimentos %}
+                                    <option value="{{ alimento.nombre}}">{{ alimento.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-primary btn-md btn-rounded m-1 btn_filter">Filtrar</a>
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <a href="{% url "alimento.add" %}" class="btn btn-primary btn-md btn-rounded m-1"><i class="i-Add text-white mr-2"></i> Agregar</a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div id="ajax_alimento">
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Gráfico de alimentos</h3>
+                        <div id="alimento_chart"></div>
+                    </div>
+                </div>
+                
+            </div>
+            <!-- end of col-->
+
+        </div>
+    </div>
+<div class="modal fade" id="alimentomodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myLargeModalLabel">Consumo Alimentos</h5>
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form data-parsley-validate id="exportForm">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label for="name">Nombre </label>
+                            <input type="text" class="form-control" id="name" name="name" required value="" disabled>
+                        </div>
+                        <div class="col-lg-4">
+                            <label for="ecantidad">Existe Cantidad (Kilos)</label>
+                            <input type="text" class="form-control double" id="ecantidad" name="ecantidad" required value="" disabled>
+                        </div>
+                        <div class="col-lg-4">
+                            <label for="cantidad">Cantidad (Kilos)</label>
+                            <input type="text" class="form-control double" id="cantidad" name="cantidad" required value="">
+                            <ul id="cantidad_valid" style="display: none;" class="parsley-errors-list filled">
+                                <li class="parsley-required">
+                                    La cantidad debe ser menor que la cantidad de origen.
+                                </li>
+                            </ul>
+                        </div>  
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label for="destination">Destino</label>
+                            <input type="text" class="form-control" id="destination" name="destination" required value="">
+                        </div>
+                        <div class="col-lg-4">
+                            <label for="usedate">Fecha uso</label>
+                            <input type="text" class="form-control pickadate" id="usedate" name="usedate" required value="">
+                        </div>
+                    </div>
+                    <input type="hidden" id="alimento_id" value="-1" />
+                </form>
+                
+            </div>
+            <div class="modal-footer">
+                <input id="btn_export" type="button" class="btn btn-primary" value="OK">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var names = {{g_name|safe}};
+    var cantidads = {{g_cantidad|safe}};
+
+    if ($("#alimento_chart").length) {
+        var options = {
+            chart: {
+
+                type: 'bar',
+            },
+            colors: 'rgba(104, 122, 232, 0.85)',
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                }
+            },
+            dataLabels: {
+                enabled: false,
+                endingShape: 'rounded',
+                columnWidth: '55%',
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            series: [{
+                name: "Alimento",
+                data: cantidads
+            }],
+            xaxis: {
+                categories: names,
+            },
+            yaxis: {
+                title: {
+                    text: '(Cantidad)'
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val
+                    }
+                }
+            },
+            fill: {
+                opacity: 1
+
+            },
+        };
+
+        var chart = new ApexCharts(
+            document.querySelector("#alimento_chart"),
+            options
+        );
+        chart.render();
+    }
+    ajax_all_Alimento();
+    
+    function ajax_all_Alimento() {
+        $.ajax({
+			headers: { "X-CSRFToken": '{{csrf_token}}' },
+			url: '{% url "ajax_all_alimento" %}',
+			data: {
+				
+			},
+			type: 'POST',
+			success: function (data) {
+				$("#ajax_alimento").html(data)
+			}
+		});
+    };
+    $("#cantidad").on('keyup', function(e){
+        
+        var cant = $("#cantidad").val();
+        var ocant = $("#ecantidad").val();
+        if (parseInt(cant) > parseInt(ocant)) {
+            $("#cantidad_valid").css("display", "block"); 
+            $('#btn_export').prop('disabled', true);
+        } else {
+            $("#cantidad_valid").css("display", "none");
+            $('#btn_export').prop('disabled', false);
+        }
+    })
+    $("#btn_export").on('click', function(e){
+        $('#exportForm').parsley().validate();
+        $.ajax({
+            headers: { "X-CSRFToken": '{{csrf_token}}' },
+            url: '{% url "ajaxalimentoexport" %}',
+            data: {
+                'alimento_id': $("#alimento_id").val(),
+                'cantidad': $("#cantidad").val(),
+                'destino': $("#destination").val(),
+                'usedate': $("#usedate").val(),
+                'name': $("#name").val(),
+            },
+            type: 'POST',
+            success: function (data) {
+               if(data.status == "OK") {
+                   location.reload();
+                   swal({
+                        text: "Alimento exporta con éxito!",
+                        type: 'success',
+                        buttonsStyling: false,
+                        confirmButtonClass: 'btn btn-lg btn-danger',
+                    }); 
+               }
+            }
+        });
+        
+
+        
+    })
+    $(".btn_filter").on('click', function(e){
+        
+        if ($("#name_sel").val() == null && $("#daterange_sel").val() == "") {
+            location.reload();
+        } else {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_filter_alimento" %}',
+                data: {
+                    "name": $("#name_sel").val(),
+                    'daterange': $("#daterange_sel").val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    $("#ajax_alimento").html(data)
+                }
+            });
+        }
+    });
+    $('input[name="daterange"]').daterangepicker(
+        {
+            format: 'DD.MM.YYYY',
+            howDropdowns: true,
+            showWeekNumbers: true,
+            timePicker: false,
+            timePickerIncrement: 1,
+            timePicker12Hour: true,
+            locale: {
+                applyLabel: 'Aceptar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Custom',
+                daysOfWeek: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sáb'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                firstDay: 1
+            }
+        }, 
+    );
+</script>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Toros{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Toros</h1>
+    <ul>
+        <li><a href="{% url "toros" %}">Inicio</a></li>
+        <li>Listado</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="card text-left">
+                    <div class="card-header text-right bg-transparent">                    
+                        <a href="{% url "toros.add" %}" class="btn btn-primary btn-md btn-rounded m-1"><i class="i-Add text-white mr-2"></i> Agregar</a>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Listado</h4>
+                        <p>Resumen de la información referente</p>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Nombre</th>
+                                        <th scope="col">Raza</th>
+                                        <th scope="col">F. Nacimiento</th>
+                                        <th scope="col">F. Compra</th>
+                                        <th scope="col">F. Primer Monta</th>
+                                        <th scope="col">Edad</th>
+                                        <th scope="col">Estado</th>
+                                        <th scope="col">Foto</th>
+                                        <th scope="col">Creado</th>
+                                        <th scope="col">Actualizo</th>
+                                        <th scope="col">Usuario</th>
+                                        <th scope="col">Proceso</th>
+                                        {% if 'auth.change_toro' in perms %}
+                                        <th scope="col">Acciones</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for toro in toros %}
+                                    <tr data-id="{{ toro.id }}">
+                                        <td>{{ toro.id }}</td>
+                                        <td>{{ toro.nombre }}</td>
+                                        <td>{{ toro.raza }}</td>
+                                        <td>{{ toro.fecha_nacimiento }}</td>
+                                        <td>{{ toro.fecha_compra }}</td>
+                                        <td>{{ toro.fecha_primer_monta }}</td>
+                                        <td>{{ toro.fecha_nacimiento|timesince:current_time }}</td>
+                                        <td>{{ toro.estado }}</td>
+                                        <td>{% if toro.foto %}<a href="{{ toro.foto_url }}" data-fancybox><img src="{{ toro.foto_url }}" class="img-fluid" width="50" /></a>{% endif %}</td>
+                                        <td>{{ toro.created_at|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ toro.updated_at|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ toro.usuario.first_name }} {{ toro.usuario.last_name }}</td>
+                                        <td class="align-middle">
+                                            <button type="button" data-id="{{toro.id}}" class="btn btn-outline-primary btn-sm btn_process">
+                                                Dados de baja
+                                            </button> 
+                                        </td>
+                                        {% if 'auth.change_toro' in perms %}
+                                        <td>
+                                            <a href="{% url "toros.update" toro.id %}" class="text-success mr-2">
+                                                <i class="nav-icon i-Pen-2 font-weight-bold"></i>
+                                            </a>
+                                            <a onclick="confirm_delete('{% url "toros.delete" toro.id %}', {{ toro.id }})" href="#" class="text-danger mr-2">
+                                                <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                                            </a>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end of col-->
+
+        </div>
+    </div>
+    <div class="modal fade" id="toroprocessmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Dados de baja</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form data-parsley-validate id="processForm">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <div class="col-lg-12">
+                                <label for="name">Seleccione el método de proceso </label>
+                                <select class="form-control" id="processm" name="processm" required>
+                                    <option value="">-----</option>
+                                    <option value="Muerte">Muerte</option>
+                                    <option value="Venta">Venta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">                                
+                            <div class="col-lg-6">
+                                <label for="fecha_processm">Fecha<span style="color: red;">(*)</span></label>
+                                <input type="text" class="form-control pickadate" id="fecha_processm" name="fecha_processm" required value="" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">                                
+                            <div class="col-lg-12">
+                                <label for="reason">Razón<span style="color: red;">(*)</span></label>
+                                <textarea type="text" class="form-control" rows="3" id="reason" name="reason" required value=""></textarea>
+                            </div>
+                        </div>
+                        <input type="hidden" id="toro_id" value="-1" />
+                    </form>
+                    
+                </div>
+                <div class="modal-footer">
+                    <input id="btn_toro_p" type="button" class="btn btn-primary" value="OK">
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(".btn_process").on('click', function(e){
+        $("#toro_id").val($(this).data('id'));
+        $("#toroprocessmodal").modal();
+    });
+
+    $("#btn_toro_p").on('click', function(){
+        $('#processForm').parsley().validate();
+        $.ajax({
+            headers: { "X-CSRFToken": '{{csrf_token}}' },
+            url: '{% url "ajax_process_toro" %}',
+            data: {
+                "toro_id": $("#toro_id").val(),
+                "processm": $("#processm").val(),
+                "reason": $("#reason").val(),
+                "fecha_processm": $("#fecha_processm").val()
+            },
+            type: 'POST',
+            success: function (data) {
+                if(data.status == "OK") {
+                   location.reload();
+                   swal({
+                        text: "Procesar con éxito!",
+                        type: 'success',
+                        buttonsStyling: false,
+                        confirmButtonClass: 'btn btn-lg btn-danger',
+                    }); 
+               }
+            }
+        });
+    })
+
+    $('.table').DataTable({
+        order: [[ 0, 'asc' ]],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
+            buttons: {
+                    colvisRestore: "- Restaurar Columnas -",
+                    copy: 'Copiar',
+                    copyTitle: 'Ajouté au presse-papiers',
+                    copyKeys: 'Appuyez sur <i>ctrl</i> ou <i>\u2318</i> + <i>C</i> pour copier les données du tableau à votre presse-papiers. <br><br>Pour annuler, cliquez sur ce message ou appuyez sur Echap.',
+                    copySuccess: {
+                        _: '%d lignes copiées',
+                        1: '1 ligne copiée'
+                    }
+                }
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'copyHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'pdfHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'colvis',
+                text: "Columnas",
+                postfixButtons: [ 'colvisRestore' ]
+            }
+        ],
+        
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Información del Toro{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información del Toro</h1>
+    <ul>
+        <li><a href="{% url "toros" %}">Inicio</a></li>
+        <li>Editar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <form method="post" action="{% url "toros.update" toro.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>
+                <div class="card-body">
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="nombre">Nombre<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required value="{{ toro.nombre }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="raza">Raza<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="raza" name="raza" required value="{{ toro.raza }}">
+                        </div>
+                    </div>
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="fecha_nacimiento">Fecha de Nacimiento<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_nacimiento" name="fecha_nacimiento" required value="{{ toro.fecha_nacimiento|date:"Y-m-d" }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="fecha_compra">Fecha de Compra<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_compra" name="fecha_compra" required value="{{ toro.fecha_compra|date:"Y-m-d" }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="fecha_primer_monta">Fecha de Primer Monta<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_primer_monta" name="fecha_primer_monta" required value="{{ toro.fecha_primer_monta|date:"Y-m-d" }}">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label for="foto">Foto<span style="color: red;">(*)</span></label>
+                            <input id="foto" name="foto" type="file" class="dropify" {% if toro.foto is not None %}data-default-file="{{ toro.foto_url }}"{% endif %} />
+                            <input id="foto_old" name="foto_old" type="hidden" value="{{ toro.foto }}" />
+                        </div>
+                    </div>                      
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="estado">Estado<span style="color: red;">(*)</span></label>
+                            <select name="estado" id="estado" class="form-control" required>
+                                <option selected disabled>--</option>
+                                <option value="Activo" {% if toro.estado == "Activo" %} selected {% endif %}>Activo</option>
+                                <option value="Descartado" {% if toro.estado == "Descartado" %} selected {% endif %}>Descartado</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-6" id="motivo_estado_div">
+                            <label for="motivo_estado">Motivo<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="motivo_estado" name="motivo_estado" value="{{ toro.motivo_estado }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row text-right">
+                            <div class="col-lg-12 ">
+                                <button type="submit" class="btn btn-primary btn-rounded m-1">Guardar</button>
+                                <a href="{% url "toros" %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $('.dropify').dropify({
+        messages: {
+            'default': 'Drag and drop a file here or click',
+            'replace': 'Drag and drop or click to replace',
+            'remove':  'Remove',
+            'error':   'Ooops, something wrong happended.'
+        }
+    }).on('dropify.afterClear', function(event, element){
+        $("#foto_old").val("");
+    });
+    $("#estado").change(function() {
+        $("#motivo_estado_div").css("display", $(this).val() == "Descartado" ? "block" : "none" );
+    });
+    $("#estado").trigger("change");
+    var fecha_nacimiento = $('#fecha_nacimiento').pickadate({
+        format: 'yyyy-mm-dd',
+        formatSubmit: 'yyyy-mm-dd',
+        hiddenName: true,
+        selectYears: 20,
+        selectMonths: true,
+        max: "{% now 'Y-m-d' %}",
+        onSet: function() {
+            fecha_compra.pickadate('picker').set({
+                min: $("#fecha_nacimiento").val()
+            })
+            console.log(new Date(fecha_compra.pickadate('picker').get()).getTime())
+            if ( fecha_compra.pickadate('picker').get() < fecha_nacimiento.pickadate('picker').get() ) {
+                fecha_compra.pickadate('picker').set({
+                    select: null
+                })  
+                fecha_primer_monta.pickadate('picker').set({
+                    select: null
+                })  
+            }            
+        }
+    });
+    var fecha_compra = $('#fecha_compra').pickadate({
+        format: 'yyyy-mm-dd',
+        formatSubmit: 'yyyy-mm-dd',
+        hiddenName: true,
+        selectYears: 20,
+        selectMonths: true,
+        max: "{% now 'Y-m-d' %}",
+        onSet: function() {
+            fecha_primer_monta.pickadate('picker').set({
+                min: $("#fecha_compra").val()
+            })
+            if ( fecha_primer_monta.pickadate('picker').get() < fecha_compra.pickadate('picker').get() ) {
+                fecha_primer_monta.pickadate('picker').set({
+                    select: null
+                })  
+            }
+        }
+    });
+    var fecha_primer_monta = $('#fecha_primer_monta').pickadate({
+        format: 'yyyy-mm-dd',
+        formatSubmit: 'yyyy-mm-dd',
+        hiddenName: true,
+        selectYears: 20,
+        selectMonths: true,
+        max: "{% now 'Y-m-d' %}",
+        onSet: function() {
+            console.log("xxx")
+        }
+    });
+</script>
+{% endblock %}

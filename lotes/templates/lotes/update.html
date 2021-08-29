@@ -1,0 +1,56 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Información del Lote{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información del Lote</h1>
+    <ul>
+        <li><a href="{% url "lotes" %}">Inicio</a></li>
+        <li>Editar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <form method="post" action="{% url "lotes.update" lote.id %}">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>
+                <div class="card-body">
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="nombre">Nombre<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required value="{{ lote.nombre }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="carga">Carga<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control numeric" id="carga" name="carga" required value="{{ lote.carga }}">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="fecha_entrada">Fecha de Ingreso<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_entrada" name="fecha_entrada" required value="{{ lote.fecha_entrada|date:"Y-m-d" }}">
+                        </div>                        
+                        <div class="col-lg-3">
+                            <label for="fecha_salida">Fecha de Salida<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_salida" name="fecha_salida" value="{{ lote.fecha_salida|date:"Y-m-d" }}">
+                        </div>                        
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row text-right">
+                            <div class="col-lg-12 ">
+                                <button type="submit" class="btn btn-primary btn-rounded m-1">Guardar</button>
+                                <a href="{% url "lotes" %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% load static %} 
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-transparent"> 
+                    <h3>Reportes gráficos</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="fecha_suministro">Fecha</label>
+                            <input type="text" class="form-control pickadate" id="fecha" name="fecha" required value="{{fecha}}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary btn-md btn-rounded m-1 btn_filter_graphic">Filtrar</a>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div style="padding-top: 15px;" id="production_chart"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(".btn_filter_graphic").on('click', function(e){
+        if ($("#fecha").val() == "") {
+            
+        } else {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_filter_graphic" %}',
+                data: {
+                    "fecha": $("#fecha").val(),
+                },
+                type: 'POST',
+                success: function (data) {
+                    $("#graphic_report").html(data)
+                }
+            });
+        }
+    });
+    $('.pickadate').pickadate({
+        format: 'yyyy-mm-dd',
+        formatSubmit: 'yyyy-mm-dd',
+        hiddenName: true,
+        selectYears: 20,
+        selectMonths: true,
+        max: "{% now 'Y-m-d' %}"
+    });
+    var names = {{g_name|safe}};
+    var cantidads = {{g_cantidad|safe}};
+    if ($("#production_chart").length) {
+        var options = {
+            chart: {
+
+                type: 'bar',
+            },
+            colors: 'rgba(104, 122, 232, 0.85)',
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                }
+            },
+            dataLabels: {
+                enabled: false,
+                endingShape: 'rounded',
+                columnWidth: '55%',
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            series: [{
+                name: "Produccion",
+                data: cantidads
+            }],
+            xaxis: {
+                categories: names,
+            },
+            yaxis: {
+                title: {
+                    text: '(Cantidad)'
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val
+                    }
+                }
+            },
+            fill: {
+                opacity: 1
+
+            },
+        };
+
+        var chart = new ApexCharts(
+            document.querySelector("#production_chart"),
+            options
+        );
+        chart.render();
+    }
+    
+</script>

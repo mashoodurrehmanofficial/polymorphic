@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" dir="">
+
+{% load static %}
+{% load i18n %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Gull - admin login</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,400i,600,700,800,900" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/styles/css/themes/lite-purple.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/styles/vendor/sweetalert2.min.css' %}"> 
+</head>
+
+<body class="text-left">
+    <div class="auth-layout-wrap" style="background-image: url({% static 'assets/images/photo-wide-4.jpg' %})">
+        <div class="auth-content">
+            <div class="card o-hidden">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="p-4">
+                            <div class="auth-logo text-center mb-4">
+                                <img src="{% static 'assets/images/logo.png' %}" alt="">
+                            </div>
+                            <h1 class="mb-3 text-18">Restablecer Contraseña</h1>
+                            <form method="post" action="{% url "forgot" %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="email">Correo electrónico<span style="color: red;">(*)</span></label>
+                                    <input id="email" name="email" class="form-control form-control-rounded" type="email">
+                                </div>
+                                <button class="btn btn-primary btn-block btn-rounded mt-3">Restablecer</button>
+
+                            </form>
+                            <div class="mt-3 text-center">
+                                <a class="text-muted" href="{% url "login" %}"><u>Iniciar Sesión</u></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'assets/js/vendor/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'assets/js/es5/script.min.js' %}"></script>
+
+    <script>
+        {% if messages %}
+        {% for message in messages %}
+            swal({
+                text: "{{ message }}",
+                type: "{{ message.tags }}",
+                buttonsStyling: false,
+                confirmButtonClass: 'btn btn-lg btn-danger',
+            }); 
+        {% endfor %}
+        {% endif %}
+    </script>    
+</body>
+
+</html>

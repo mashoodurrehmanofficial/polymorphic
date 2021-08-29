@@ -1,0 +1,203 @@
+{% extends 'master.html' %}
+{% block page-title %}Vacas{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Vacas</h1>
+    <ul>
+        <li><a href="{% url "vacas" %}">Inicio</a></li>
+        <li>Listado</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <div class="card text-left">
+                    
+                    <div class="card-header bg-transparent">    
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="nombre">Nombre</label>
+                                <select class="form-control" id="name_sel" name="name" required>
+                                    <option disabled selected>-----</option>
+                                    {% for vaca in vacas %}
+                                    <option value="{{ vaca.nombre}}">{{ vaca.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 text-left">
+                                <label for="nombre">Razas</label>
+                                <select class="form-control" id="razas_sel" name="razas" required>
+                                    <option disabled selected>-----</option>
+                                    {% for vaca in vacas %}
+                                    <option value="{{ vaca.raza }}">{{ vaca.raza }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="nombre">Rango de fechas</label>
+                                <input class="input-sm form-control" type="text" name="daterange" id="daterange_sel" value=""/>
+                            </div>
+                            <div class="col-md-1 text-right">
+                                <button type="button" class="btn btn-primary btn-md btn-rounded m-1 btn_filter">Filtrar</a>
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <a href="{% url "vacas.add" %}" class="btn btn-primary btn-md btn-rounded m-1"><i class="i-Add text-white mr-2"></i> Agregar</a>
+                            </div>
+                        </div>                
+                        
+                    </div>
+                    <div id="ajax_vacas">
+                        
+                    </div>
+                </div>
+            </div>
+            <!-- end of col-->
+
+        </div>
+    </div>
+    <div class="modal fade" id="vacasprocessmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Dados de baja</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form data-parsley-validate id="processForm">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <div class="col-lg-12">
+                                <label for="name">Seleccione el método de proceso </label>
+                                <select class="form-control" id="processm" name="processm" required>
+                                    <option value="">-----</option>
+                                    <option value="Muerte">Muerte</option>
+                                    <option value="Venta">Venta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">                                
+                            <div class="col-lg-6">
+                                <label for="fecha_processm">Fecha<span style="color: red;">(*)</span></label>
+                                <input type="text" class="form-control pickadate" id="fecha_processm" name="fecha_processm" required value="" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">                                
+                            <div class="col-lg-12">
+                                <label for="reason">Razón<span style="color: red;">(*)</span></label>
+                                <textarea type="text" class="form-control" rows="3" id="reason" name="reason" required value=""></textarea>
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="vacas_id" value="-1" />
+                    </form>
+                    
+                </div>
+                <div class="modal-footer">
+                    <input id="btn_vacas_p" type="button" class="btn btn-primary" value="OK">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    ajax_all_Vacas();
+    
+    function ajax_all_Vacas() {
+        $.ajax({
+			headers: { "X-CSRFToken": '{{csrf_token}}' },
+			url: '{% url "ajax_all_vacas" %}',
+			data: {
+				
+			},
+			type: 'POST',
+			success: function (data) {
+				$("#ajax_vacas").html(data)
+			}
+		});
+    };
+
+    $(".btn_filter").on('click', function(e){
+        if ($("#razas_sel").val() == null && $("#name_sel").val() == null && $("#daterange_sel").val() == "") {
+            location.reload();
+        } else {
+            $.ajax({
+                headers: { "X-CSRFToken": '{{csrf_token}}' },
+                url: '{% url "ajax_filter_vacas" %}',
+                data: {
+                    "razas": $("#razas_sel").val(),
+                    "name": $("#name_sel").val(),
+                    'daterange': $("#daterange_sel").val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    $("#ajax_vacas").html(data)
+                }
+            });
+        }
+    });
+    $("#btn_vacas_p").on('click', function(){
+        $('#processForm').parsley().validate();
+        if ($('#processForm').parsley().validate() === false) {
+            return;
+        } else{
+            $.ajax({
+            headers: { "X-CSRFToken": '{{csrf_token}}' },
+            url: '{% url "ajax_process_vacas" %}',
+            data: {
+                "vacas_id": $("#vacas_id").val(),
+                "processm": $("#processm").val(),
+                "reason": $("#reason").val(),
+                "fecha_processm": $("#fecha_processm").val()
+            },
+            type: 'POST',
+            success: function (data) {
+                if(data == "OK") {
+                   location.reload();
+                   swal({
+                        text: "Procesar con éxito!",
+                        type: 'success',
+                        buttonsStyling: false,
+                        confirmButtonClass: 'btn btn-lg btn-danger',
+                    }); 
+               }
+            }
+        });
+        }
+        
+    })
+    
+</script>
+
+<script>
+    $('input[name="daterange"]').daterangepicker(
+        {
+            format: 'DD.MM.YYYY',
+            howDropdowns: true,
+            showWeekNumbers: true,
+            timePicker: false,
+            timePickerIncrement: 1,
+            timePicker12Hour: true,
+            locale: {
+                applyLabel: 'Aceptar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'Desde',
+                toLabel: 'Hasta',
+                customRangeLabel: 'Custom',
+                daysOfWeek: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sáb'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                firstDay: 1
+            }
+        }, 
+    );
+</script>
+{% endblock %}

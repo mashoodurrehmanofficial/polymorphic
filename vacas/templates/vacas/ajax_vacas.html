@@ -1,0 +1,111 @@
+{% load static %}
+<div class="card-body">
+    <h4 class="card-title mb-3">Listado</h4>
+    <p>Resumen de la información referente</p>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Raza</th>
+                    <th scope="col">F. Nacimiento</th>
+                    <th scope="col">Edad</th>
+                    <th scope="col">No. Crías</th>
+                    <th scope="col">T. Preñez</th>
+                    <th scope="col">Foto</th>
+                    <th scope="col">Creado</th>
+                    <th scope="col">Actualizo</th>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">xxxx</th>
+                    <th scope="col">Proceso</th>
+                    {% if 'auth.change_vaca' in perms %}
+                    <th scope="col">Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for vaca in vacas %}
+                <tr data-id="{{ vaca.id }}">
+                    <td class="align-middle">{{ vaca.id }}</td>
+                    <td class="align-middle">{{ vaca.nombre }}</td>
+                    <td class="align-middle">{{ vaca.raza }}</td>
+                    <td class="align-middle">{{ vaca.fecha_nacimiento }}</td>
+                    <td class="align-middle">{{ vaca.fecha_nacimiento|timesince:current_time }}</td>
+                    <td class="align-middle">{{ vaca.cria_set.all.count }}</td>
+                    <td class="align-middle">{{ vaca.tiempo_preñez|default_if_none:'' }}</td>
+                    <td class="align-middle">{% if vaca.foto %}<a href="{{ vaca.foto_url }}" data-fancybox><img src="{{ vaca.foto_url }}" class="img-fluid" width="50" /></a>{% endif %}</td>
+                    <td class="align-middle">{{ vaca.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td class="align-middle">{{ vaca.updated_at|date:"Y-m-d H:i:s" }}</td>
+                    <td class="align-middle">{{ vaca.usuario.first_name }} {{ vaca.usuario.last_name }}</td>
+                    <td class="align-middle">{{ vaca.preñez_pasada }}</td>
+                    <td class="align-middle">
+                        <button type="button" data-id="{{vaca.id}}" class="btn btn-outline-primary btn-sm btn_process">
+                            dados de baja
+                        </button> 
+                    </td>
+                    {% if 'auth.change_vaca' in perms %}
+                    <td class="align-middle">
+                        <a href="{% url "vacas.update" vaca.id %}" class="text-success mr-2">
+                            <i class="nav-icon i-Pen-2 font-weight-bold"></i>
+                        </a>
+                        <a onclick="confirm_delete('{% url "vacas.delete" vaca.id %}', {{ vaca.id }})" href="#" class="text-danger mr-2">
+                            <i class="nav-icon i-Close-Window font-weight-bold"></i>
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(".btn_process").on('click', function(e){
+        $("#vacas_id").val($(this).data('id'));
+        $("#vacasprocessmodal").modal();
+    })
+    $('.table').DataTable({
+        order: [[ 0, 'asc' ]],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Spanish.json",
+            buttons: {
+                    colvisRestore: "- Restaurar Columnas -",
+                    copy: 'Copiar',
+                    copyTitle: 'Ajouté au presse-papiers',
+                    copyKeys: 'Appuyez sur <i>ctrl</i> ou <i>\u2318</i> + <i>C</i> pour copier les données du tableau à votre presse-papiers. <br><br>Pour annuler, cliquez sur ce message ou appuyez sur Echap.',
+                    copySuccess: {
+                        _: '%d lignes copiées',
+                        1: '1 ligne copiée'
+                    }
+                }
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'copyHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'pdfHtml5',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            {
+                extend: 'colvis',
+                text: "Columnas",
+                postfixButtons: [ 'colvisRestore' ]
+            }
+        ],
+      
+    });
+</script>

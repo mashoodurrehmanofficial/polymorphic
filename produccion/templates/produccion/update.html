@@ -1,0 +1,57 @@
+{% extends 'master.html' %}
+
+{% block page-title %}Información de la Produccion{% endblock%}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <h1>Información de la Produccion</h1>
+    <ul>
+        <li><a href="{% url "produccion" %}">Inicio</a></li>
+        <li>Editar</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        <div class="card my-3">
+            <form method="post" action="{% url "produccion.update" produccion.id %}">
+                {% csrf_token %}
+                <h5 class="card-header">Detalle</h5>
+                <div class="card-body">
+                    <div class="form-group row">
+                        <div class="col-lg-3">
+                            <label for="vaca_id">Vaca<span style="color: red;">(*)</span></label>
+                            <select class="form-control" name="vaca_id" required>
+                                <option>--</option>
+                                {% for vaca in vacas %}
+                                <option value="{{ vaca.id }}" {% if produccion.vaca_id == vaca.id %} selected {% endif %}>{{ vaca.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">                                
+                        <div class="col-lg-3">
+                            <label for="fecha_produccion">Fecha de Producción<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control pickadate" id="fecha_produccion" name="fecha_produccion" required value="{{ produccion.fecha_produccion|date:"Y-m-d" }}">
+                        </div>
+                        <div class="col-lg-3">
+                            <label for="cantidad">Cantidad (Litros)<span style="color: red;">(*)</span></label>
+                            <input type="text" class="form-control double" id="cantidad" name="cantidad" required value="{{ produccion.cantidad}}">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="mc-footer">
+                        <div class="row text-right">
+                            <div class="col-lg-12 ">
+                                <button type="submit" class="btn btn-primary btn-rounded m-1">Guardar</button>
+                                <a href="{% url "produccion" %}" class="btn btn-outline-secondary btn-rounded m-1">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
